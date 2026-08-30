@@ -16,6 +16,14 @@ EMOTIONAL_TAGS = (
     "apathy", "craving", "pride",
 )
 
+THEMES = (
+    "detachment from outcomes", "duty & right action", "impermanence",
+    "equanimity", "self-discipline", "surrender & trust",
+    "knowledge vs ignorance", "ego & humility", "desire & its mastery",
+    "steadiness of mind", "acceptance of loss", "courage in adversity",
+    "faith", "non-attachment to results", "purpose & svadharma (one's own path)",
+)
+
 LIFE_SITUATIONS = (
     "career pressure", "exam/study stress", "relationship conflict",
     "breakup/divorce", "family conflict", "grief/bereavement", "health/illness",
