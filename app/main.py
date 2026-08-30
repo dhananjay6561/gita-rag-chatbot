@@ -6,6 +6,7 @@ Stateless: no accounts, no server-side history at MVP (PLAN §10).
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import time
 import uuid
@@ -13,6 +14,7 @@ from contextlib import asynccontextmanager
 from typing import Literal, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from app import config, generation, resources, retrieval, safety
@@ -151,3 +153,28 @@ async def ask(req: AskRequest):
             verse_refs=[], verses=[], mode=req.mode,
             crisis_block=None, out_of_scope=False,
         )
+
+
+_STREAM_CHUNK = 24
+_META_KEYS = ("verse_refs", "verses", "crisis_resources", "out_of_scope", "disclaimer")
+
+
+@app.post("/ask/stream", dependencies=[Depends(_rate_limit)])
+async def ask_stream(req: AskRequest):
+    """SSE variant for the chat UI (§10). Grounding needs the full text first, so we
+    stream only the guardrail-verified reply — never unverified tokens (§4.4)."""
+    request_id = str(uuid.uuid4())
+
+    async def events():
+        try:
+            result = await asyncio.wait_for(_run_pipeline(req, request_id), config.REQUEST_TIMEOUT_S)
+        except asyncio.TimeoutError:
+            log.warning("pipeline_timeout request_id=%s", request_id)
+            yield f"event: error\ndata: {json.dumps({'reply': 'This is taking longer than expected — please try again.'})}\n\n"
+            return
+        reply = result["reply"]
+        for i in range(0, len(reply), _STREAM_CHUNK):
+            yield f"data: {json.dumps({'token': reply[i:i + _STREAM_CHUNK]})}\n\n"
+        yield f"event: done\ndata: {json.dumps({k: result[k] for k in _META_KEYS})}\n\n"
+
+    return StreamingResponse(events(), media_type="text/event-stream")
