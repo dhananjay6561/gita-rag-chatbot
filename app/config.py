@@ -17,6 +17,21 @@ SCOPE_THRESHOLD = float(os.getenv("SCOPE_THRESHOLD", "1.0"))  # placeholder; tun
 K = int(os.getenv("RETRIEVE_K", "4"))
 MIN_CANDIDATES = int(os.getenv("MIN_CANDIDATES", "3"))        # below this → full-corpus fallback
 
+# --- Serving limits (PLAN §9, ARCH §8) --------------------------------------
+REQUEST_TIMEOUT_S = float(os.getenv("REQUEST_TIMEOUT_S", "30"))  # bounded per-query deadline
+RATE_LIMIT_MAX = int(os.getenv("RATE_LIMIT_MAX", "20"))          # requests per window, per client
+RATE_LIMIT_WINDOW_S = float(os.getenv("RATE_LIMIT_WINDOW_S", "60"))
+
 # --- Secrets (presence checked at startup, values never logged) -------------
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+
+def require_secrets() -> None:
+    """Fail fast at boot if a required key is missing (never log the values)."""
+    missing = [name for name, val in (
+        ("ANTHROPIC_API_KEY", ANTHROPIC_API_KEY),
+        ("OPENAI_API_KEY", OPENAI_API_KEY),
+    ) if not val]
+    if missing:
+        raise RuntimeError(f"missing required secrets: {', '.join(missing)}")
