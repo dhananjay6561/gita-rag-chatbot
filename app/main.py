@@ -40,6 +40,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
+@app.get("/health")
+async def health():
+    """Liveness + readiness for the managed platform (Railway/Render)."""
+    ready = hasattr(app.state, "all_ids")
+    return {"status": "ok", "index_loaded": ready,
+            "corpus_size": len(app.state.all_ids) if ready else 0}
+
+
 def _verse_panel(verses, verse_refs: list[str]) -> list[dict]:
     """Panel data straight from metadata — never the model's reproduction (§4.3)."""
     refs = set(verse_refs)
