@@ -7,14 +7,16 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
 import uuid
 from contextlib import asynccontextmanager
 from typing import Literal, Optional
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from app import config, generation, resources, retrieval, safety
+from app.ratelimit import RateLimiter
 
 log = logging.getLogger("gita")
 
@@ -39,6 +41,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+_limiter = RateLimiter(config.RATE_LIMIT_MAX, config.RATE_LIMIT_WINDOW_S)
+
+
+def _rate_limit(request: Request) -> None:
+    client = request.client.host if request.client else "unknown"
+    if not _limiter.allow(client, time.monotonic()):
+        raise HTTPException(status_code=429, detail="Too many requests — please slow down.")
 
 
 @app.get("/health")
@@ -113,7 +123,7 @@ async def _run_pipeline(req: AskRequest, request_id: str) -> dict:
         )
 
 
-@app.post("/ask")
+@app.post("/ask", dependencies=[Depends(_rate_limit)])
 async def ask(req: AskRequest):
     request_id = str(uuid.uuid4())  # server-generated, for tracing (§10-11)
     try:
