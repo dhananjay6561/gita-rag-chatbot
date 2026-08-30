@@ -1,0 +1,15 @@
+# Runtime deps (ARCH §13). Security §9: pin EVERY version.
+# The pins below are a known-good floor — after first install, lock exact
+# transitive versions with:  pip freeze > requirements.lock
+langchain==0.3.27
+langchain-community==0.3.27       # FAISS vectorstore
+langchain-openai==0.2.14          # OpenAIEmbeddings (index + query)
+langchain-anthropic==0.3.3        # ChatAnthropic (safety+classify, generation)
+faiss-cpu==1.9.0
+fastapi==0.115.6
+uvicorn==0.34.0
+pydantic==2.10.4
+anyio==4.7.0                      # threadpool offload for sync FAISS calls
+
+# Build-time only (scripts/), not imported by app/:
+#   indic-transliteration==2.3.66  # IAST transliteration from Devanagari (PLAN §3.1)
