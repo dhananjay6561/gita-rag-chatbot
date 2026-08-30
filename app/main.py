@@ -44,6 +44,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+if config.ALLOWED_ORIGINS:
+    from fastapi.middleware.cors import CORSMiddleware
+    app.add_middleware(
+        CORSMiddleware, allow_origins=config.ALLOWED_ORIGINS,
+        allow_methods=["GET", "POST"], allow_headers=["*"],
+    )
+
 _limiter = RateLimiter(config.RATE_LIMIT_MAX, config.RATE_LIMIT_WINDOW_S)
 
 
