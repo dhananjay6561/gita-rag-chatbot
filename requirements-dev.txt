@@ -2,5 +2,7 @@
 pytest==8.4.2
 pytest-asyncio==1.2.0
 
-# Keyless local retrieval demo only (scripts/demo_retrieval_local.py), not prod:
-sentence-transformers==5.1.2
+# Keyless local demos (scripts/demo_*_local.py) need `sentence-transformers` and a
+# running Ollama — kept OUT of this file so CI stays lean; install them ad hoc:
+#   pip install sentence-transformers   # local embeddings
+#   brew install ollama && ollama pull llama3.2:3b   # local generation
