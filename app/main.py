@@ -5,6 +5,7 @@ Stateless: no accounts, no server-side history at MVP (PLAN §10).
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 import uuid
 from contextlib import asynccontextmanager
@@ -75,9 +76,7 @@ def _response(reply, *, verse_refs, verses, mode, crisis_block, out_of_scope):
     }
 
 
-@app.post("/ask")
-async def ask(req: AskRequest):
-    request_id = str(uuid.uuid4())  # server-generated, for tracing (§10-11)
+async def _run_pipeline(req: AskRequest, request_id: str) -> dict:
     crisis_block = None
     try:
         # [1] SAFETY + CLASSIFY — one Haiku call (regex tripwire runs inside).
@@ -111,4 +110,18 @@ async def ask(req: AskRequest):
             "I'm having trouble right now. Please try again in a moment.",
             verse_refs=[], verses=[], mode=req.mode,
             crisis_block=crisis_block, out_of_scope=False,
+        )
+
+
+@app.post("/ask")
+async def ask(req: AskRequest):
+    request_id = str(uuid.uuid4())  # server-generated, for tracing (§10-11)
+    try:
+        return await asyncio.wait_for(_run_pipeline(req, request_id), config.REQUEST_TIMEOUT_S)
+    except asyncio.TimeoutError:
+        log.warning("pipeline_timeout request_id=%s", request_id)
+        return _response(
+            "This is taking longer than expected — please try again.",
+            verse_refs=[], verses=[], mode=req.mode,
+            crisis_block=None, out_of_scope=False,
         )
