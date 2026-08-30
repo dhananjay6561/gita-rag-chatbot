@@ -1,3 +1,6 @@
 # Dev/test-only deps (not in the serving image). Pin per Security §9.
 pytest==8.4.2
 pytest-asyncio==1.2.0
+
+# Keyless local retrieval demo only (scripts/demo_retrieval_local.py), not prod:
+sentence-transformers==5.1.2
