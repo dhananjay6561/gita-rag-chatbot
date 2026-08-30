@@ -15,3 +15,6 @@ venv/
 
 # Local eval output
 eval/reports/
+
+# Local session notes (not part of the repo)
+docs/SESSION.md
