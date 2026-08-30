@@ -86,7 +86,15 @@ def _response(reply, *, verse_refs, verses, mode, crisis_block, out_of_scope):
     }
 
 
+def _log_metrics(request_id: str, start: float, **fields) -> None:
+    """Per-request metrics — no raw user text, privacy-respecting (§11)."""
+    extra = " ".join(f"{k}={v}" for k, v in fields.items())
+    log.info("request_id=%s latency_ms=%d %s", request_id,
+             int((time.monotonic() - start) * 1000), extra)
+
+
 async def _run_pipeline(req: AskRequest, request_id: str) -> dict:
+    start = time.monotonic()
     crisis_block = None
     try:
         # [1] SAFETY + CLASSIFY — one Haiku call (regex tripwire runs inside).
@@ -97,6 +105,7 @@ async def _run_pipeline(req: AskRequest, request_id: str) -> dict:
         # [2-3] RETRIEVE + SCOPE CHECK
         verses = await retrieval.retrieve(req.query, screen.emotional_tags)
         if verses is None:
+            _log_metrics(request_id, start, outcome="out_of_scope", crisis=bool(crisis_block))
             return _response(
                 "Nothing in the Gita speaks directly to this. If it helps, tell me "
                 "how the situation is making you feel and I'll try again.",
@@ -105,17 +114,24 @@ async def _run_pipeline(req: AskRequest, request_id: str) -> dict:
             )
 
         # [4-5] GENERATE + GROUNDING GUARDRAIL
+        regens = 0
+
+        async def _regen(correction: str) -> str:
+            nonlocal regens
+            regens += 1
+            return await generation.generate(req.query, verses, correction=correction)
+
         raw = await generation.generate(req.query, verses)
         reply, verse_refs = await generation.enforce_grounding(
-            raw, verses, all_ids=app.state.all_ids,
-            regen=lambda corr: generation.generate(req.query, verses, correction=corr),
-        )
+            raw, verses, all_ids=app.state.all_ids, regen=_regen)
+        _log_metrics(request_id, start, outcome="ok", crisis=bool(crisis_block),
+                     retrieved=len(verses), refs=len(verse_refs), regens=regens)
         return _response(reply, verse_refs=verse_refs, verses=verses, mode=req.mode,
                          crisis_block=crisis_block, out_of_scope=False)
 
     except Exception as e:
         # Never surface a stack trace to the seeker; log the type only, no raw query (§10).
-        log.warning("pipeline_failure request_id=%s error=%s", request_id, type(e).__name__)
+        _log_metrics(request_id, start, outcome="error", error=type(e).__name__)
         return _response(
             "I'm having trouble right now. Please try again in a moment.",
             verse_refs=[], verses=[], mode=req.mode,
