@@ -36,9 +36,15 @@ cp .env.example .env        # add ANTHROPIC_API_KEY + OPENAI_API_KEY
 
 ```bash
 python -m scripts.build_index          # build FAISS index from data/verses.jsonl
-uvicorn app.main:app --reload          # serve POST /ask
+uvicorn app.main:app --reload          # serve the API
 pytest -q                              # unit tests (no API keys needed)
 ```
+
+Endpoints: `POST /ask` (JSON), `POST /ask/stream` (SSE for the chat UI), `GET /health`.
+Serving is hardened: per-client rate limiting, per-request deadline, startup secret
+validation, graceful errors (no stack traces), and per-request metrics logging.
+
+No keys handy? See the keyless local demos in `scripts/demo_*_local.py`.
 
 ## Eval gates (need API keys)
 
