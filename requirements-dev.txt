@@ -1,0 +1,3 @@
+# Dev/test-only deps (not in the serving image). Pin per Security §9.
+pytest==8.4.2
+pytest-asyncio==1.2.0
