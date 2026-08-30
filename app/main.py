@@ -10,9 +10,7 @@ import uuid
 from contextlib import asynccontextmanager
 from typing import Literal, Optional
 
-from anthropic import AnthropicError
 from fastapi import FastAPI
-from openai import OpenAIError
 from pydantic import BaseModel, Field
 
 from app import generation, resources, retrieval, safety
@@ -97,7 +95,8 @@ async def ask(req: AskRequest):
         return _response(reply, verse_refs=verse_refs, verses=verses, mode=req.mode,
                          crisis_block=crisis_block, out_of_scope=False)
 
-    except (AnthropicError, OpenAIError, TimeoutError) as e:
+    except Exception as e:
+        # Never surface a stack trace to the seeker; log the type only, no raw query (§10).
         log.warning("pipeline_failure request_id=%s error=%s", request_id, type(e).__name__)
         return _response(
             "I'm having trouble right now. Please try again in a moment.",
