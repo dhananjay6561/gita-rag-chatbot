@@ -1,0 +1,17 @@
+# Secrets — never commit (PLAN §9)
+.env
+.env.*
+!.env.example
+
+# Built index artifact — reproducible from data/verses.jsonl (ARCH §9)
+index/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Local eval output
+eval/reports/
