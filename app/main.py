@@ -13,7 +13,7 @@ from typing import Literal, Optional
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
-from app import generation, resources, retrieval, safety
+from app import config, generation, resources, retrieval, safety
 
 log = logging.getLogger("gita")
 
@@ -30,6 +30,7 @@ class AskRequest(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    config.require_secrets()  # fail fast if a required key is missing (§9)
     vs = retrieval.load_index()
     app.state.all_ids = {d.metadata["id"] for d in vs.docstore._dict.values()}
     retrieval.assert_distance_orientation(vs)  # fail fast if score orientation is wrong
