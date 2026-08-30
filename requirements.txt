@@ -12,4 +12,5 @@ pydantic==2.10.4
 anyio==4.7.0                      # threadpool offload for sync FAISS calls
 
 # Build-time only (scripts/), not imported by app/:
+#   requests==2.32.3               # fetch source corpus in assemble_verses.py
 #   indic-transliteration==2.3.66  # IAST transliteration from Devanagari (PLAN §3.1)
