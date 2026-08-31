@@ -43,13 +43,19 @@ _SYSTEM = (
 )
 
 _model = None
+_PROVIDER = "anthropic"  # set from --provider in main
 
 
 def _get_model():
     global _model
     if _model is None:
-        from langchain_anthropic import ChatAnthropic
-        _model = ChatAnthropic(model=config.SAFETY_MODEL, max_tokens=1024).with_structured_output(VerseTags)
+        if _PROVIDER == "ollama":
+            from langchain_ollama import ChatOllama  # local, keyless
+            base = ChatOllama(model=config.OLLAMA_CHAT_MODEL, base_url=config.OLLAMA_BASE_URL)
+        else:
+            from langchain_anthropic import ChatAnthropic
+            base = ChatAnthropic(model=config.SAFETY_MODEL, max_tokens=1024)
+        _model = base.with_structured_output(VerseTags)
     return _model
 
 
@@ -73,10 +79,17 @@ async def _main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--in", dest="src", default="data/verses_raw.jsonl")
     ap.add_argument("--out", dest="out", default="data/verses.jsonl")
+    ap.add_argument("--provider", default="anthropic", choices=["anthropic", "ollama"])
+    ap.add_argument("--limit", type=int, default=None)  # tag only the first N (sampling)
     ap.add_argument("--concurrency", type=int, default=4)
     args = ap.parse_args()
 
+    global _PROVIDER
+    _PROVIDER = args.provider
+
     raw = [json.loads(l) for l in Path(args.src).read_text().splitlines() if l.strip()]
+    if args.limit:
+        raw = raw[:args.limit]
     sem = asyncio.Semaphore(args.concurrency)
     tagged = await asyncio.gather(*(_tag_one(v, sem) for v in raw))
     Path(args.out).write_text("\n".join(json.dumps(v, ensure_ascii=False) for v in tagged) + "\n")
