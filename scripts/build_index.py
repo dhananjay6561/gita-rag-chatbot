@@ -14,9 +14,8 @@ from pathlib import Path
 from langchain_community.vectorstores import FAISS
 from langchain_community.vectorstores.utils import DistanceStrategy
 from langchain_core.documents import Document
-from langchain_openai import OpenAIEmbeddings
 
-from app import config
+from app.embeddings import get_embeddings
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data" / "verses.jsonl"
@@ -46,7 +45,7 @@ def _load_docs() -> list[Document]:
 
 def main() -> None:
     docs = _load_docs()
-    embeddings = OpenAIEmbeddings(model=config.EMBEDDING_MODEL)  # 3072-dim
+    embeddings = get_embeddings()  # config-driven: openai (3072-dim) or ollama (local)
     # COSINE (not the default L2) → bounded, interpretable distance for the scope
     # threshold. The SAME strategy must be used at query time (retrieval.py).
     vs = FAISS.from_documents(docs, embeddings, distance_strategy=DistanceStrategy.COSINE)

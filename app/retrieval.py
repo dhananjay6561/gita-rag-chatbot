@@ -22,8 +22,8 @@ _vs = None
 def _get_embeddings():
     global _embeddings
     if _embeddings is None:
-        from langchain_openai import OpenAIEmbeddings  # lazy: keep import cost out of tests
-        _embeddings = OpenAIEmbeddings(model=config.EMBEDDING_MODEL)
+        from app.embeddings import get_embeddings  # config-driven provider
+        _embeddings = get_embeddings()
     return _embeddings
 
 
