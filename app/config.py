@@ -12,6 +12,12 @@ GENERATION_MODEL = "claude-opus-4-8"     # Krishna persona; adaptive thinking, n
 SAFETY_MODEL = "claude-haiku-4-5"        # merged safety-screen + classifier (one call)
 EMBEDDING_MODEL = "text-embedding-3-large"  # 3072-dim; same at index + query
 
+# Chat providers: "anthropic" (prod) or "ollama" (local, free, no key). Ollama is
+# for dev / keyless testing — tone and quality are below Claude (Decisions Log).
+GENERATION_PROVIDER = os.getenv("GENERATION_PROVIDER", "anthropic")
+SAFETY_PROVIDER = os.getenv("SAFETY_PROVIDER", "anthropic")
+OLLAMA_CHAT_MODEL = os.getenv("OLLAMA_CHAT_MODEL", "llama3.2:3b")
+
 # Embeddings provider: "openai" (prod, text-embedding-3-large) or "ollama"
 # (local, free, no key). Switching providers changes the vector space, so rebuild
 # the index AND recalibrate SCOPE_THRESHOLD (see build_index / ARCH §4.2).
@@ -40,12 +46,14 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 def require_secrets() -> None:
     """Fail fast at boot if a required key is missing (never log the values).
 
-    OPENAI_API_KEY is only needed for the OpenAI embeddings provider — the local
-    Ollama provider needs no key.
+    Only the providers actually in use require a key — the local Ollama providers
+    need none.
     """
-    required = [("ANTHROPIC_API_KEY", ANTHROPIC_API_KEY)]
+    required = []
     if EMBEDDINGS_PROVIDER == "openai":
         required.append(("OPENAI_API_KEY", OPENAI_API_KEY))
+    if "anthropic" in (GENERATION_PROVIDER, SAFETY_PROVIDER):
+        required.append(("ANTHROPIC_API_KEY", ANTHROPIC_API_KEY))
     missing = [name for name, val in required if not val]
     if missing:
         raise RuntimeError(f"missing required secrets: {', '.join(missing)}")
