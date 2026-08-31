@@ -94,10 +94,13 @@ _classifier = None
 def _get_classifier():
     global _classifier
     if _classifier is None:
-        from langchain_anthropic import ChatAnthropic  # lazy: keeps import cost out of tests
-        _classifier = ChatAnthropic(
-            model=config.SAFETY_MODEL, max_tokens=512,
-        ).with_structured_output(SafetyResult)
+        if config.SAFETY_PROVIDER == "ollama":
+            from langchain_ollama import ChatOllama  # local, keyless (dev/testing)
+            base = ChatOllama(model=config.OLLAMA_CHAT_MODEL, base_url=config.OLLAMA_BASE_URL)
+        else:
+            from langchain_anthropic import ChatAnthropic  # lazy: keeps import cost out of tests
+            base = ChatAnthropic(model=config.SAFETY_MODEL, max_tokens=512)
+        _classifier = base.with_structured_output(SafetyResult)
     return _classifier
 
 
