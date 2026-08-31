@@ -24,16 +24,20 @@ _model = None
 def _get_model():
     global _model
     if _model is None:
-        from langchain_anthropic import ChatAnthropic  # lazy: keep import cost out of tests
-        # No temperature/top_p on Opus 4.8 (they 400). Steer tone via the prompt,
-        # depth via effort, plus adaptive thinking. Stream for low TTFT.
-        _model = ChatAnthropic(
-            model=config.GENERATION_MODEL,
-            thinking={"type": "adaptive"},
-            model_kwargs={"output_config": {"effort": "medium"}},
-            streaming=True,
-            max_tokens=1024,
-        )
+        if config.GENERATION_PROVIDER == "ollama":
+            from langchain_ollama import ChatOllama  # local, keyless (dev/testing)
+            _model = ChatOllama(model=config.OLLAMA_CHAT_MODEL, base_url=config.OLLAMA_BASE_URL)
+        else:
+            from langchain_anthropic import ChatAnthropic  # lazy: keep import cost out of tests
+            # No temperature/top_p on Opus 4.8 (they 400). Steer tone via the prompt,
+            # depth via effort, plus adaptive thinking. Stream for low TTFT.
+            _model = ChatAnthropic(
+                model=config.GENERATION_MODEL,
+                thinking={"type": "adaptive"},
+                model_kwargs={"output_config": {"effort": "medium"}},
+                streaming=True,
+                max_tokens=1024,
+            )
     return _model
 
 
