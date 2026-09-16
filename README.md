@@ -23,6 +23,7 @@ scripts/    build_index.py (FAISS from data/), tag_verses.py (taxonomy-constrain
 data/       verses.jsonl (corpus; 18-verse seed at MVP — see data/README.md)
 eval/       golden_retrieval.jsonl (G1), safety_set.jsonl (G2), run.py, run_safety.py
 tests/      unit tests for the pieces vanilla RAG lacks (guardrail, filter, scope, safety)
+frontend/   Next.js chat UI (App Router, Tailwind v4); shares the API contract via a Zod SSOT
 ```
 
 ## Setup
@@ -45,6 +46,19 @@ Serving is hardened: per-client rate limiting, per-request deadline, startup sec
 validation, graceful errors (no stack traces), and per-request metrics logging.
 
 No keys handy? See the keyless local demos in `scripts/demo_*_local.py`.
+
+## Frontend
+
+A Next.js chat UI lives in `frontend/`. It talks to this API through server-side
+proxy routes and validates every response against a Zod contract that mirrors
+`/ask` and `/health`. See `frontend/README.md` for setup and deploy.
+
+```bash
+cd frontend
+pnpm install
+cp .env.example .env.local     # set BACKEND_URL to this API
+pnpm dev
+```
 
 ## Eval gates (need API keys)
 

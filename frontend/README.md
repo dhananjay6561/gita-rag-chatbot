@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sakha - Gita RAG frontend
 
-## Getting Started
+Calm, contemplative chat UI for the Gita RAG backend. A seeker types what weighs
+on them and receives a grounded verse plus a short reflection. Built with Next.js
+(App Router), Tailwind v4, and a schema-first contract shared with the backend.
 
-First, run the development server:
+## Design
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Warm-paper palette with a single burnt-saffron accent, light and dark mode via
+  `prefers-color-scheme`. Every text/background pair is verified WCAG AA.
+- Outfit for interface text; Spectral serif reserved for verse and reflection
+  reading content.
+- Motion is restrained and always honors `prefers-reduced-motion`.
+
+## Architecture
+
+```
+lib/contract.ts        Zod SSOT mirroring the backend /ask + /health contract
+lib/api.ts             server-only backend client, validates every payload
+lib/site.ts            site constants (name, url) feeding metadata + JSON-LD
+lib/structured-data.ts schema.org JSON-LD, derived from lib/site.ts
+app/api/ask            proxy route; keeps BACKEND_URL server-side
+app/page.tsx           static server shell + <Ask/> client island
+components/            ask flow, answer, verse card, crisis banner, skeleton
+scripts/gen-schema     emits schema/*.json from lib/contract.ts
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The browser never calls the backend directly. It calls `/api/*` route handlers,
+which call `lib/api.ts` server-side and validate the response against the Zod
+contract before it reaches the UI, so a backend contract drift fails loudly.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm install
+cp .env.example .env.local     # set BACKEND_URL to the running FastAPI app
+```
 
-## Learn More
+## Run
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm dev                       # dev server on :3000
+pnpm build && pnpm start       # production build
+pnpm lint                      # eslint
+pnpm gen:schema                # regenerate schema/*.json after editing the contract
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Environment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Variable | Purpose |
+|---|---|
+| `BACKEND_URL` | FastAPI base URL, server-side only |
+| `BACKEND_TIMEOUT_MS` | Abort a backend call after this many ms (default 35000) |
+| `NEXT_PUBLIC_SITE_URL` | Canonical public URL for metadata, OG, sitemap, JSON-LD |
 
-## Deploy on Vercel
+## Deploy
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deploys to Vercel as-is. Set `BACKEND_URL` and `NEXT_PUBLIC_SITE_URL` in the
+project environment. Security headers, sitemap, robots, and a generated OG image
+and favicon are built in.
