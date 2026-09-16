@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Outfit, Spectral } from "next/font/google";
 import "./globals.css";
 import { SITE } from "@/lib/site";
+import { buildJsonLd } from "@/lib/structured-data";
+import { JsonLd } from "@/components/json-ld";
 
 // Interface face. Self-hosted by next/font (no render-blocking <link>), swap +
 // size-adjust fallback to keep CLS at 0.
@@ -22,8 +24,29 @@ const spectral = Spectral({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE.url),
   title: { default: `${SITE.name} - ${SITE.tagline}`, template: `%s - ${SITE.name}` },
   description: SITE.description,
+  applicationName: SITE.name,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: SITE.name,
+    title: `${SITE.name} - ${SITE.tagline}`,
+    description: SITE.description,
+    url: SITE.url,
+    locale: SITE.locale,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE.name} - ${SITE.tagline}`,
+    description: SITE.description,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
 };
 
 export const viewport: Viewport = {
@@ -39,7 +62,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${outfit.variable} ${spectral.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <JsonLd data={buildJsonLd()} />
+        {children}
+      </body>
     </html>
   );
 }
