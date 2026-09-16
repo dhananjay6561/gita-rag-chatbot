@@ -1,0 +1,29 @@
+{
+  "$id": "AskRequest.schema.json",
+  "title": "AskRequest",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "locale": {
+      "type": "string"
+    },
+    "mode": {
+      "default": "guidance",
+      "type": "string",
+      "enum": [
+        "guidance",
+        "verses"
+      ]
+    }
+  },
+  "required": [
+    "query",
+    "mode"
+  ],
+  "additionalProperties": false
+}

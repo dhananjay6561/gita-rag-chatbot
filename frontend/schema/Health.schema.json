@@ -1,0 +1,25 @@
+{
+  "$id": "Health.schema.json",
+  "title": "Health",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string"
+    },
+    "index_loaded": {
+      "type": "boolean"
+    },
+    "corpus_size": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": [
+    "status",
+    "index_loaded",
+    "corpus_size"
+  ],
+  "additionalProperties": false
+}

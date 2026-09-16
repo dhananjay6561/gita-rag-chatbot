@@ -1,0 +1,104 @@
+{
+  "$id": "AskResponse.schema.json",
+  "title": "AskResponse",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "reply": {
+      "type": "string"
+    },
+    "verse_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "verses": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "sanskrit": {
+                "type": "string"
+              },
+              "transliteration": {
+                "type": "string"
+              },
+              "translation": {
+                "type": "string"
+              },
+              "translation_source": {
+                "type": "string"
+              },
+              "sanskrit_source": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "sanskrit",
+              "transliteration",
+              "translation",
+              "translation_source",
+              "sanskrit_source"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "crisis_resources": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "contact": {
+                "type": "string"
+              },
+              "region": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "contact",
+              "region"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "out_of_scope": {
+      "type": "boolean"
+    },
+    "disclaimer": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "reply",
+    "verse_refs",
+    "verses",
+    "crisis_resources",
+    "out_of_scope",
+    "disclaimer"
+  ],
+  "additionalProperties": false
+}
