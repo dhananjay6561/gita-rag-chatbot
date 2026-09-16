@@ -7,7 +7,12 @@
 import { NextResponse } from "next/server";
 
 import { AskRequestSchema } from "@/lib/contract";
-import { askBackend, BackendError, BackendTimeoutError } from "@/lib/api";
+import {
+  askBackend,
+  BackendError,
+  BackendTimeoutError,
+  BackendUnavailableError,
+} from "@/lib/api";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic"; // never statically cached; per-query
@@ -26,6 +31,9 @@ export async function POST(request: Request) {
   } catch (err) {
     if (err instanceof BackendTimeoutError) {
       return NextResponse.json({ error: "upstream_timeout" }, { status: 504 });
+    }
+    if (err instanceof BackendUnavailableError) {
+      return NextResponse.json({ error: "upstream_unavailable" }, { status: 503 });
     }
     if (err instanceof BackendError) {
       return NextResponse.json({ error: "upstream_error" }, { status: 502 });

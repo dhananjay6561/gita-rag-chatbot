@@ -38,6 +38,14 @@ export class BackendTimeoutError extends Error {
   }
 }
 
+/** Thrown when the backend is unreachable (down, DNS, connection refused). */
+export class BackendUnavailableError extends Error {
+  constructor() {
+    super("backend unreachable");
+    this.name = "BackendUnavailableError";
+  }
+}
+
 async function backendFetch(path: string, init: RequestInit): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -51,7 +59,8 @@ async function backendFetch(path: string, init: RequestInit): Promise<Response> 
     if (err instanceof DOMException && err.name === "AbortError") {
       throw new BackendTimeoutError();
     }
-    throw err;
+    // fetch rejects with a TypeError on connection refused / DNS / network drop.
+    throw new BackendUnavailableError();
   } finally {
     clearTimeout(timer);
   }
