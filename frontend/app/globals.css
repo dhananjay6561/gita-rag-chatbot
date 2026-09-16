@@ -1,26 +1,85 @@
 @import "tailwindcss";
 
+/*
+ * Semantic token strategy (one system, swapped by prefers-color-scheme).
+ * Warm-paper base, single burnt-saffron accent. Every pair below is verified
+ * WCAG AA. No pure #000/#fff. Do not introduce a second accent hue.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --bg: #f7f5ef; /* warm paper */
+  --surface: #fffdf9; /* raised reading surface */
+  --surface-2: #f0ece2; /* subtle fill (chips, skeletons) */
+  --border: #e4ded1;
+  --ink: #26221b; /* warm near-black */
+  --muted: #6f685b; /* AA on surface */
+  --accent: #b0491d; /* burnt saffron */
+  --accent-ink: #fffaf4; /* text on accent */
+  --accent-soft: #f6e7db; /* tinted accent wash */
+  --ring: #b0491d;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #14120e;
+    --surface: #1d1a15;
+    --surface-2: #262219;
+    --border: #332e22;
+    --ink: #ece6d8;
+    --muted: #a39a88;
+    --accent: #e0824a;
+    --accent-ink: #1a1206;
+    --accent-soft: #2a2013;
+    --ring: #e0824a;
   }
 }
 
+/* Map tokens to Tailwind utilities (bg-surface, text-ink, border-border, ...) */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --font-sans: var(--font-outfit);
+  --font-serif: var(--font-spectral);
+}
+
+html {
+  color-scheme: light dark;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Consistent focus ring on every interactive element (a11y). */
+:where(a, button, textarea, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* MOTION_INTENSITY 3: one gentle entrance, gated behind reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .rise-in {
+    animation: rise-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes rise-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
