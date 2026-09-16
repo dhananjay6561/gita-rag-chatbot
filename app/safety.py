@@ -21,6 +21,7 @@ from typing import Literal, Optional
 from pydantic import BaseModel, Field
 
 from app import config, taxonomy
+from app.cache import AsyncLRU
 
 # --- Regex tripwire: high-signal, explicit crisis phrasing only -------------
 # Deliberately narrow. This is a FLOOR, not the detector — recall lives in the
@@ -104,16 +105,27 @@ def _get_classifier():
     return _classifier
 
 
+# Memoise the (expensive) LLM verdict on the raw query text. The floor is applied
+# later in screen_and_classify, so a cache hit never bypasses the tripwire.
+_cache = AsyncLRU(maxsize=config.SAFETY_CACHE_SIZE) if config.SAFETY_CACHE_SIZE else None
+
+
+async def _classify_uncached(query: str) -> SafetyResult:
+    result: SafetyResult = await _get_classifier().ainvoke(
+        [("system", _SYSTEM), ("human", f"<seeker>{query}</seeker>")]
+    )
+    return _sanitize(result)
+
+
 async def classify(query: str) -> SafetyResult:
     """Raw LLM verdict, sanitized — the tripwire floor is NOT applied here.
 
     Exposed so the G2 harness can report the regex-vs-LLM contribution split
     (EVAL_SPEC §3.4) without a second model call.
     """
-    result: SafetyResult = await _get_classifier().ainvoke(
-        [("system", _SYSTEM), ("human", f"<seeker>{query}</seeker>")]
-    )
-    return _sanitize(result)
+    if _cache is None:
+        return await _classify_uncached(query)
+    return await _cache.get_or_set(query, lambda: _classify_uncached(query))
 
 
 def apply_floor(result: SafetyResult, tripped: bool) -> SafetyResult:

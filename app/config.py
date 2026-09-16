@@ -30,6 +30,11 @@ SCOPE_THRESHOLD = float(os.getenv("SCOPE_THRESHOLD", "1.0"))  # placeholder; tun
 K = int(os.getenv("RETRIEVE_K", "4"))
 MIN_CANDIDATES = int(os.getenv("MIN_CANDIDATES", "3"))        # below this → full-corpus fallback
 
+# --- Caching (perf: cut repeat model latency/spend; size-bounded, ARCH §8) --
+# 0 disables the cache. Inputs are stable text (query string), so hits are exact.
+SAFETY_CACHE_SIZE = int(os.getenv("SAFETY_CACHE_SIZE", "1024"))
+EMBED_CACHE_SIZE = int(os.getenv("EMBED_CACHE_SIZE", "2048"))
+
 # --- Serving limits (PLAN §9, ARCH §8) --------------------------------------
 REQUEST_TIMEOUT_S = float(os.getenv("REQUEST_TIMEOUT_S", "30"))  # bounded per-query deadline
 RATE_LIMIT_MAX = int(os.getenv("RATE_LIMIT_MAX", "20"))          # requests per window, per client
