@@ -95,3 +95,33 @@ body.composing .recede {
   font-family: var(--font-mono), ui-monospace, monospace;
   font-variant-numeric: tabular-nums;
 }
+
+/* Static legal pages (privacy, terms). Plain running prose on the letterpress
+   measure — section heads in the serif, body soft, links rubricated. */
+.legal-prose > * + * {
+  margin-top: 1.15rem;
+}
+.legal-prose h2 {
+  margin-top: 2.5rem;
+  color: var(--ink);
+  font-family: var(--font-serif), ui-serif, serif;
+  font-size: 1.35rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.legal-prose a {
+  color: var(--accent);
+  text-underline-offset: 0.2em;
+  text-decoration: underline;
+}
+.legal-prose strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.legal-prose ul {
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+.legal-prose li + li {
+  margin-top: 0.5rem;
+}
