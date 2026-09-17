@@ -41,12 +41,6 @@ export default function TermsPage() {
         distress, but this is a supportive prompt, not a safety guarantee.
       </p>
 
-      <h2>Who may use it</h2>
-      <p>
-        {SITE.name} is intended for adults (18 and over) and is not directed at
-        children. Please do not use it if you are under 18.
-      </p>
-
       <h2>Acceptable use</h2>
       <ul>
         <li>Do not use the service for any unlawful or harmful purpose.</li>
