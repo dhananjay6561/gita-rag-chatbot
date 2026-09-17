@@ -13,7 +13,7 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className="mx-auto w-full max-w-[44rem] px-6 pb-16">
+      <footer className="recede mx-auto w-full max-w-[44rem] px-6 pb-16">
         <div className="h-px w-full bg-rule" aria-hidden />
         <p className="mt-6 max-w-[62ch] font-sans text-xs leading-relaxed text-ink-soft">
           {SITE.name} is an AI representation of Bhagavad Gita concepts. It is

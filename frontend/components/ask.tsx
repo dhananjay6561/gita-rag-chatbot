@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { CircleNotch, PaperPlaneTilt } from "@phosphor-icons/react";
+import { motion, useReducedMotion } from "motion/react";
+import { ArrowRight, CircleNotch } from "@phosphor-icons/react";
 
 import {
   AskResponseSchema,
@@ -23,14 +24,14 @@ type Status = "idle" | "loading" | "done" | "error";
 const MAX = 2000;
 
 const EXAMPLES = [
-  "I am paralysed by a big decision and afraid of choosing wrong.",
-  "I worked hard and still failed. What was the point of any of it?",
-  "I cannot stop worrying about things that are out of my hands.",
+  "I am paralysed by a decision, and afraid of choosing wrong.",
+  "I worked hard and still failed. What was the point of it?",
+  "I cannot stop worrying about what I cannot control.",
 ];
 
-const MODE_LABEL: Record<Mode, { label: string; hint: string }> = {
-  guidance: { label: "Guidance", hint: "A short reflection" },
-  verses: { label: "Verses", hint: "Reflection with the full verses" },
+const MODE_LABEL: Record<Mode, string> = {
+  guidance: "Guidance",
+  verses: "Verses",
 };
 
 function messageForStatus(status: number): string {
@@ -57,6 +58,7 @@ export function Ask() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [asked, setAsked] = useState("");
   const [partial, setPartial] = useState("");
+  const [focused, setFocused] = useState(false);
 
   const answerRef = useRef<HTMLElement>(null);
   const errorRef = useRef<HTMLParagraphElement>(null);
@@ -64,6 +66,7 @@ export function Ask() {
 
   const labelId = useId();
   const helpId = useId();
+  const reduce = useReducedMotion();
 
   const loading = status === "loading";
   const empty = query.trim().length === 0;
@@ -72,6 +75,12 @@ export function Ask() {
     if (status === "done") answerRef.current?.focus();
     if (status === "error") errorRef.current?.focus();
   }, [status]);
+
+  // Recede the surrounding chrome while composing (see globals.css .recede).
+  useEffect(() => {
+    document.body.classList.toggle("composing", focused);
+    return () => document.body.classList.remove("composing");
+  }, [focused]);
 
   async function submit() {
     const q = query.trim();
@@ -126,8 +135,6 @@ export function Ask() {
         setStatus("error");
         return;
       }
-      // The reply text is streamed; recombine it with the done-frame metadata
-      // and validate the whole thing against the same schema the JSON path uses.
       const full = AskResponseSchema.safeParse({ reply, ...(done ?? {}) });
       if (!done || !full.success) {
         setErrorMsg("The reply came back incomplete. Please try again.");
@@ -154,8 +161,12 @@ export function Ask() {
     textareaRef.current?.focus();
   }
 
+  const spring = reduce
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 420, damping: 34 };
+
   return (
-    <div className="grid gap-8">
+    <div className="grid gap-10">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -163,88 +174,113 @@ export function Ask() {
         }}
         className="grid gap-3"
       >
-        <label id={labelId} htmlFor="query" className="font-sans text-sm font-medium text-ink">
+        <label
+          id={labelId}
+          htmlFor="query"
+          className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft"
+        >
           What is weighing on you?
         </label>
 
-        <textarea
-          id="query"
-          ref={textareaRef}
-          value={query}
-          onChange={(e) => setQuery(e.target.value.slice(0, MAX))}
-          onKeyDown={onKeyDown}
-          rows={4}
-          maxLength={MAX}
-          aria-labelledby={labelId}
-          aria-describedby={helpId}
-          placeholder="Describe the situation or the feeling you are sitting with."
-          className="glass w-full resize-y rounded-xl px-4 py-3 font-sans text-base leading-relaxed text-ink placeholder:text-muted"
-        />
+        <div className="rounded-edition border border-rule-strong transition-colors focus-within:border-ink-soft/60">
+          <textarea
+            id="query"
+            ref={textareaRef}
+            value={query}
+            onChange={(e) => setQuery(e.target.value.slice(0, MAX))}
+            onKeyDown={onKeyDown}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            rows={3}
+            maxLength={MAX}
+            aria-labelledby={labelId}
+            aria-describedby={helpId}
+            placeholder="Describe the situation, or the feeling you are sitting with."
+            className="w-full resize-none bg-transparent px-4 py-4 font-serif text-lg leading-relaxed text-ink placeholder:text-ink-soft/70 focus:outline-none"
+          />
 
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-          <p id={helpId} className="font-sans text-xs text-muted">
-            Press Cmd or Ctrl plus Enter to send. Nothing you write is stored.
-          </p>
-          <span className="font-sans text-xs tabular-nums text-muted" aria-hidden>
-            {query.length} / {MAX}
-          </span>
-        </div>
+          <div className="flex items-center justify-between gap-4 border-t border-rule px-3 py-2.5">
+            <div
+              role="radiogroup"
+              aria-label="Answer style"
+              className="flex items-center gap-1"
+            >
+              {MODES.map((m) => {
+                const active = mode === m;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    onClick={() => setMode(m)}
+                    className="relative rounded-edition px-3 py-1.5 font-sans text-sm"
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="mode-indicator"
+                        transition={spring}
+                        className="absolute inset-0 rounded-edition bg-accent"
+                        aria-hidden
+                      />
+                    )}
+                    <span
+                      className={`relative z-10 ${active ? "font-medium text-accent-ink" : "text-ink-soft"}`}
+                    >
+                      {MODE_LABEL[m]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-        <div className="mt-1 flex flex-wrap items-center justify-between gap-4">
-          <div
-            role="radiogroup"
-            aria-label="Answer style"
-            className="glass inline-flex rounded-xl p-1"
-          >
-            {MODES.map((m) => {
-              const active = mode === m;
-              return (
-                <button
-                  key={m}
-                  type="button"
-                  role="radio"
-                  aria-checked={active}
-                  onClick={() => setMode(m)}
-                  title={MODE_LABEL[m].hint}
-                  className={`rounded-lg px-3 py-1.5 font-sans text-sm font-medium transition-colors ${
-                    active
-                      ? "bg-accent text-accent-ink"
-                      : "text-muted hover:text-ink"
-                  }`}
-                >
-                  {MODE_LABEL[m].label}
-                </button>
-              );
-            })}
+            <div className="flex items-center gap-3">
+              <span id={helpId} className="font-mono text-xs tabular-nums text-ink-soft">
+                {query.length}/{MAX}
+              </span>
+              <button
+                type="submit"
+                disabled={empty || loading}
+                className="inline-flex items-center gap-1.5 rounded-edition bg-accent px-4 py-1.5 font-sans text-sm font-medium text-accent-ink transition active:translate-y-px disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {loading ? (
+                  <CircleNotch weight="bold" className="size-3.5 motion-safe:animate-spin" aria-hidden />
+                ) : (
+                  <ArrowRight weight="bold" className="size-3.5" aria-hidden />
+                )}
+                {loading ? "Reflecting" : "Reflect"}
+              </button>
+            </div>
           </div>
-
-          <button
-            type="submit"
-            disabled={empty || loading}
-            className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 font-sans text-sm font-semibold text-accent-ink shadow-[0_0_34px_-10px_var(--accent-glow)] transition hover:-translate-y-px hover:shadow-[0_0_44px_-8px_var(--accent-glow)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0"
-          >
-            {loading ? (
-              <CircleNotch weight="bold" className="size-4 motion-safe:animate-spin" aria-hidden />
-            ) : (
-              <PaperPlaneTilt weight="bold" className="size-4" aria-hidden />
-            )}
-            {loading ? "Reflecting" : "Reflect"}
-          </button>
         </div>
+
+        <p className="font-sans text-xs text-ink-soft">
+          Press Cmd or Ctrl plus Enter to send. Nothing you write is stored.
+        </p>
       </form>
 
-      <div aria-live="polite" aria-busy={loading} className="grid gap-5">
+      <div aria-live="polite" aria-busy={loading} className="grid gap-6">
         {status === "idle" && (
-          <div className="grid gap-3">
-            <p className="font-sans text-sm text-muted">Not sure where to start? Try one of these.</p>
-            <ul className="grid gap-2">
+          <div className="recede grid gap-3">
+            <div className="flex items-center gap-4">
+              <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft">
+                Openings
+              </span>
+              <span className="h-px flex-1 bg-rule" aria-hidden />
+            </div>
+            <ul className="grid">
               {EXAMPLES.map((ex) => (
-                <li key={ex}>
+                <li key={ex} className="border-b border-rule last:border-b-0">
                   <button
                     type="button"
                     onClick={() => fillExample(ex)}
-                    className="glass w-full rounded-xl px-4 py-3 text-left font-serif text-base leading-relaxed text-ink transition-colors hover:border-accent/50"
+                    className="group flex w-full items-baseline gap-3 py-3 text-left font-serif text-lg italic leading-snug text-ink-soft transition-colors hover:text-ink"
                   >
+                    <ArrowRight
+                      weight="bold"
+                      className="size-3.5 shrink-0 translate-y-1.5 text-accent opacity-0 transition-opacity group-hover:opacity-100"
+                      aria-hidden
+                    />
                     {ex}
                   </button>
                 </li>
@@ -254,9 +290,14 @@ export function Ask() {
         )}
 
         {asked && status !== "idle" && (
-          <blockquote className="border-l-2 border-accent/40 pl-4 font-sans text-sm italic text-muted">
-            {asked}
-          </blockquote>
+          <div className="grid gap-1.5 border-l-2 border-accent pl-4">
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft">
+              You wrote
+            </span>
+            <p className="font-serif text-base italic leading-relaxed text-ink-soft">
+              {asked}
+            </p>
+          </div>
         )}
 
         {loading && (partial ? <StreamingReply text={partial} /> : <AnswerSkeleton />)}
@@ -266,7 +307,7 @@ export function Ask() {
             ref={errorRef}
             tabIndex={-1}
             role="alert"
-            className="rounded-xl border border-accent/40 bg-accent-soft px-4 py-3 font-sans text-sm text-ink outline-none"
+            className="border-l-2 border-accent py-1 pl-4 font-sans text-sm text-ink outline-none"
           >
             {errorMsg}
           </p>

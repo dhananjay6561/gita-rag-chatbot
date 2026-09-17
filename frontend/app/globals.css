@@ -75,6 +75,20 @@ body::after {
   outline-offset: 2px;
 }
 
+/* Compose-focus: while the seeker is writing, the surrounding chrome recedes so
+   attention rests on the act of writing (motivated: hierarchy). */
+.recede {
+  transition: opacity 0.45s ease;
+}
+body.composing .recede {
+  opacity: 0.32;
+}
+@media (prefers-reduced-motion: reduce) {
+  .recede {
+    transition: none;
+  }
+}
+
 /* Hanging rubric numeral in the left margin (verse marks / apparatus). */
 .rubric {
   color: var(--accent);

@@ -8,7 +8,7 @@ import { SITE } from "@/lib/site";
  */
 export function Masthead() {
   return (
-    <header>
+    <header className="recede">
       <div className="flex items-center gap-4">
         <span className="flex items-center gap-2.5 font-mono text-xs uppercase tracking-[0.2em] text-ink-soft">
           <span className="size-1.5 bg-accent" aria-hidden />
