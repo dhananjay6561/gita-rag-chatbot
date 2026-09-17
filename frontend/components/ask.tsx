@@ -178,7 +178,7 @@ export function Ask() {
           aria-labelledby={labelId}
           aria-describedby={helpId}
           placeholder="Describe the situation or the feeling you are sitting with."
-          className="w-full resize-y rounded-xl border border-border bg-surface px-4 py-3 font-sans text-base leading-relaxed text-ink placeholder:text-muted"
+          className="glass w-full resize-y rounded-xl px-4 py-3 font-sans text-base leading-relaxed text-ink placeholder:text-muted"
         />
 
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
@@ -194,7 +194,7 @@ export function Ask() {
           <div
             role="radiogroup"
             aria-label="Answer style"
-            className="inline-flex rounded-xl border border-border bg-surface p-1"
+            className="glass inline-flex rounded-xl p-1"
           >
             {MODES.map((m) => {
               const active = mode === m;
@@ -221,7 +221,7 @@ export function Ask() {
           <button
             type="submit"
             disabled={empty || loading}
-            className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 font-sans text-sm font-semibold text-accent-ink transition active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45"
+            className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 font-sans text-sm font-semibold text-accent-ink shadow-[0_0_34px_-10px_var(--accent-glow)] transition hover:-translate-y-px hover:shadow-[0_0_44px_-8px_var(--accent-glow)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0"
           >
             {loading ? (
               <CircleNotch weight="bold" className="size-4 motion-safe:animate-spin" aria-hidden />
@@ -243,7 +243,7 @@ export function Ask() {
                   <button
                     type="button"
                     onClick={() => fillExample(ex)}
-                    className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-left font-serif text-base leading-relaxed text-ink transition-colors hover:border-accent/50"
+                    className="glass w-full rounded-xl px-4 py-3 text-left font-serif text-base leading-relaxed text-ink transition-colors hover:border-accent/50"
                   >
                     {ex}
                   </button>

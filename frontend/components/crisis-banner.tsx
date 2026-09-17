@@ -13,7 +13,7 @@ export function CrisisBanner({ resources }: { resources: CrisisResource[] }) {
   return (
     <section
       role="alert"
-      className="rounded-xl border border-accent/40 bg-accent-soft p-5"
+      className="rounded-xl border border-accent/40 bg-crisis p-5 backdrop-blur-md shadow-[0_0_50px_-20px_var(--accent-glow)]"
     >
       <div className="flex items-center gap-2 text-accent">
         <Lifebuoy weight="bold" className="size-5 shrink-0" aria-hidden />

@@ -8,7 +8,7 @@ import type { Verse } from "@/lib/contract";
  */
 export function VerseCard({ verse }: { verse: Verse }) {
   return (
-    <article className="rounded-xl border border-border bg-surface p-5">
+    <article className="glass rounded-xl p-5">
       <div className="flex items-baseline justify-between gap-3">
         <span className="rounded-md bg-accent-soft px-2 py-0.5 font-sans text-sm font-medium text-accent">
           {verse.id}

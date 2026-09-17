@@ -7,7 +7,7 @@ export function StreamingReply({ text }: { text: string }) {
   return (
     <div
       aria-hidden
-      className="rounded-2xl border border-border bg-surface p-6 sm:p-8"
+      className="glass rounded-2xl p-6 shadow-[0_0_60px_-25px_var(--accent-glow)] sm:p-8"
     >
       <p className="whitespace-pre-line font-serif text-lg leading-relaxed text-ink">
         {text}
