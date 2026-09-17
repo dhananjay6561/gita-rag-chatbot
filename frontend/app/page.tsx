@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { SITE } from "@/lib/site";
 import { Masthead } from "@/components/masthead";
 import { Ask } from "@/components/ask";
@@ -20,6 +22,14 @@ export default function Home() {
           not scripture, not a person, and not a substitute for professional
           medical or mental-health advice.
         </p>
+        <nav className="mt-4 flex gap-5 font-mono text-[11px] uppercase tracking-[0.16em] text-ink-soft">
+          <Link href="/privacy" className="transition-colors hover:text-ink">
+            Privacy
+          </Link>
+          <Link href="/terms" className="transition-colors hover:text-ink">
+            Terms
+          </Link>
+        </nav>
       </footer>
     </>
   );
