@@ -69,6 +69,23 @@ export const HealthSchema = z.object({
 });
 export type Health = z.infer<typeof HealthSchema>;
 
+/*
+ * POST /ask/stream Server-Sent Events (main.py ask_stream). The backend streams
+ * the already-grounded reply as chunks, then a final metadata frame:
+ *   - default event: { token }        one reply chunk
+ *   - event: done:   response metadata (everything except the streamed reply)
+ *   - event: error:  { reply }        a user-safe message on timeout
+ */
+export const StreamTokenSchema = z.object({ token: z.string() });
+export type StreamToken = z.infer<typeof StreamTokenSchema>;
+
+/** Derived from AskResponse so the streamed and non-streamed shapes cannot drift. */
+export const StreamDoneSchema = AskResponseSchema.omit({ reply: true });
+export type StreamDone = z.infer<typeof StreamDoneSchema>;
+
+export const StreamErrorSchema = z.object({ reply: z.string() });
+export type StreamError = z.infer<typeof StreamErrorSchema>;
+
 /** Named registry so the JSON Schema generator stays in lockstep with exports. */
 export const CONTRACT_SCHEMAS = {
   AskRequest: AskRequestSchema,
@@ -76,4 +93,7 @@ export const CONTRACT_SCHEMAS = {
   Verse: VerseSchema,
   CrisisResource: CrisisResourceSchema,
   Health: HealthSchema,
+  StreamToken: StreamTokenSchema,
+  StreamDone: StreamDoneSchema,
+  StreamError: StreamErrorSchema,
 } as const;
