@@ -79,6 +79,24 @@ export async function askBackend(input: AskRequest): Promise<AskResponse> {
   return AskResponseSchema.parse(await res.json());
 }
 
+/**
+ * POST /ask/stream. Returns the raw upstream Response so the caller can pipe its
+ * SSE body straight to the browser. Validates the request before sending; the
+ * per-event payloads are validated client-side as they arrive (lib/sse.ts).
+ * The backend bounds its own stream duration, so no hard read deadline is
+ * imposed here beyond connection establishment.
+ */
+export async function streamBackend(input: AskRequest): Promise<Response> {
+  const body = AskRequestSchema.parse(input);
+  const res = await backendFetch("/ask/stream", {
+    method: "POST",
+    headers: { "content-type": "application/json", accept: "text/event-stream" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok || !res.body) throw new BackendError(res.status);
+  return res;
+}
+
 /** GET /health for readiness checks. */
 export async function getHealth(): Promise<Health> {
   const res = await backendFetch("/health", { method: "GET" });
