@@ -1,21 +1,21 @@
 import { SITE } from "@/lib/site";
-import { Hero } from "@/components/hero";
+import { Masthead } from "@/components/masthead";
 import { Ask } from "@/components/ask";
 
-// Static server shell. The Hero and Ask islands own the motion; the atmosphere
-// (mounted in layout) sits behind everything.
+// Static server shell. The composer and answer islands own the interaction.
 export default function Home() {
   return (
     <>
-      <main className="mx-auto w-full max-w-2xl px-5 py-20 sm:py-28">
-        <Hero />
+      <main className="mx-auto w-full max-w-[44rem] px-6 py-16 sm:py-24">
+        <Masthead />
         <div className="mt-14">
           <Ask />
         </div>
       </main>
 
-      <footer className="mx-auto w-full max-w-2xl px-5 pb-16">
-        <p className="max-w-[60ch] font-sans text-xs leading-relaxed text-muted">
+      <footer className="mx-auto w-full max-w-[44rem] px-6 pb-16">
+        <div className="h-px w-full bg-rule" aria-hidden />
+        <p className="mt-6 max-w-[62ch] font-sans text-xs leading-relaxed text-ink-soft">
           {SITE.name} is an AI representation of Bhagavad Gita concepts. It is
           not scripture, not a person, and not a substitute for professional
           medical or mental-health advice.
