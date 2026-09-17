@@ -14,7 +14,7 @@ export const SITE = {
     /\/$/,
     "",
   ),
-  locale: "en_US",
+  locale: "en_GB",
   themeColor: "#171512", // letterpress stock (locked dark theme)
 } as const;
 
