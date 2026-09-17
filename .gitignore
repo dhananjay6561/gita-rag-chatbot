@@ -18,3 +18,8 @@ eval/reports/
 
 # Local session notes (not part of the repo)
 docs/SESSION.md
+
+# Agent tooling / installed skills (local, not part of the repo)
+.claude/
+.agents/
+skills-lock.json
