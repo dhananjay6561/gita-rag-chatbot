@@ -16,6 +16,8 @@ export const SITE = {
   ),
   locale: "en_GB",
   themeColor: "#171512", // letterpress stock (locked dark theme)
+  /** Contact for privacy/data-rights requests. Set per environment before launch. */
+  contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "privacy@example.com",
 } as const;
 
 export type Site = typeof SITE;
