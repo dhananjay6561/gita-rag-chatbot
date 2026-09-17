@@ -3,9 +3,20 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { CircleNotch, PaperPlaneTilt } from "@phosphor-icons/react";
 
-import { AskResponseSchema, MODES, type AskResponse, type Mode } from "@/lib/contract";
+import {
+  AskResponseSchema,
+  MODES,
+  StreamDoneSchema,
+  StreamErrorSchema,
+  StreamTokenSchema,
+  type AskResponse,
+  type Mode,
+  type StreamDone,
+} from "@/lib/contract";
+import { parseSSE } from "@/lib/sse";
 import { Answer } from "@/components/answer";
 import { AnswerSkeleton } from "@/components/answer-skeleton";
+import { StreamingReply } from "@/components/streaming-reply";
 
 type Status = "idle" | "loading" | "done" | "error";
 
@@ -30,6 +41,14 @@ function messageForStatus(status: number): string {
   return "Something interrupted the reflection. Please try again.";
 }
 
+function safeJson(raw: string): unknown {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return undefined;
+  }
+}
+
 export function Ask() {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<Mode>("guidance");
@@ -37,6 +56,7 @@ export function Ask() {
   const [data, setData] = useState<AskResponse | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [asked, setAsked] = useState("");
+  const [partial, setPartial] = useState("");
 
   const answerRef = useRef<HTMLElement>(null);
   const errorRef = useRef<HTMLParagraphElement>(null);
@@ -60,8 +80,9 @@ export function Ask() {
     setData(null);
     setErrorMsg(null);
     setAsked(q);
+    setPartial("");
     try {
-      const res = await fetch("/api/ask", {
+      const res = await fetch("/api/ask/stream", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -70,18 +91,50 @@ export function Ask() {
           locale: typeof navigator !== "undefined" ? navigator.language : undefined,
         }),
       });
-      if (!res.ok) {
+      if (!res.ok || !res.body) {
         setErrorMsg(messageForStatus(res.status));
         setStatus("error");
         return;
       }
-      const parsed = AskResponseSchema.safeParse(await res.json());
-      if (!parsed.success) {
-        setErrorMsg("The reply came back malformed. Please try again.");
+
+      let reply = "";
+      let done: StreamDone | null = null;
+      let streamError: string | null = null;
+
+      for await (const ev of parseSSE(res.body)) {
+        const payload = safeJson(ev.data);
+        if (payload === undefined) continue;
+        if (ev.event === "done") {
+          const parsed = StreamDoneSchema.safeParse(payload);
+          if (parsed.success) done = parsed.data;
+        } else if (ev.event === "error") {
+          const parsed = StreamErrorSchema.safeParse(payload);
+          streamError = parsed.success
+            ? parsed.data.reply
+            : "Something interrupted the reflection. Please try again.";
+        } else {
+          const parsed = StreamTokenSchema.safeParse(payload);
+          if (parsed.success) {
+            reply += parsed.data.token;
+            setPartial(reply);
+          }
+        }
+      }
+
+      if (streamError) {
+        setErrorMsg(streamError);
         setStatus("error");
         return;
       }
-      setData(parsed.data);
+      // The reply text is streamed; recombine it with the done-frame metadata
+      // and validate the whole thing against the same schema the JSON path uses.
+      const full = AskResponseSchema.safeParse({ reply, ...(done ?? {}) });
+      if (!done || !full.success) {
+        setErrorMsg("The reply came back incomplete. Please try again.");
+        setStatus("error");
+        return;
+      }
+      setData(full.data);
       setStatus("done");
     } catch {
       setErrorMsg("The connection dropped. Please try again.");
@@ -206,7 +259,7 @@ export function Ask() {
           </blockquote>
         )}
 
-        {loading && <AnswerSkeleton />}
+        {loading && (partial ? <StreamingReply text={partial} /> : <AnswerSkeleton />)}
         {status === "done" && data && <Answer ref={answerRef} data={data} />}
         {status === "error" && errorMsg && (
           <p
