@@ -1,26 +1,32 @@
 import type { Metadata, Viewport } from "next";
-import { Outfit, Spectral } from "next/font/google";
+import { EB_Garamond, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SITE } from "@/lib/site";
 import { buildJsonLd } from "@/lib/structured-data";
 import { JsonLd } from "@/components/json-ld";
-import { Atmosphere } from "@/components/atmosphere";
 
-// Interface face. Self-hosted by next/font (no render-blocking <link>), swap +
-// size-adjust fallback to keep CLS at 0.
-const outfit = Outfit({
-  variable: "--font-outfit",
+// Reading + display face. Garamond is the canonical scholarly book type, so it
+// carries a critical edition of a heritage text. Self-hosted by next/font (no
+// render-blocking link), swap + size-adjust fallback for CLS 0.
+const garamond = EB_Garamond({
+  variable: "--font-eb-garamond",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+// UI chrome (labels, buttons, meta).
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin"],
   display: "swap",
 });
 
-// Reading face, reserved for verse text and reflection prose (the justified
-// scripture / manuscript exception). Loaded with the weights we actually use.
-const spectral = Spectral({
-  variable: "--font-spectral",
+// Citation apparatus and folio marks (verse references, counters).
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
-  weight: ["400", "500"],
-  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -59,11 +65,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${outfit.variable} ${spectral.variable} h-full antialiased`}
+      className={`${garamond.variable} ${geist.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <JsonLd data={buildJsonLd()} />
-        <Atmosphere />
         {children}
       </body>
     </html>

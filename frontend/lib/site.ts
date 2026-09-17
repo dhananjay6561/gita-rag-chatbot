@@ -15,7 +15,7 @@ export const SITE = {
     "",
   ),
   locale: "en_US",
-  themeColor: "#070812", // cosmic-dawn night sky (locked dark theme)
+  themeColor: "#171512", // letterpress stock (locked dark theme)
 } as const;
 
 export type Site = typeof SITE;

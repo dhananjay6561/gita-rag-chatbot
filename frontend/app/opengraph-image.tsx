@@ -18,9 +18,7 @@ export default function OpengraphImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          background: "#0a0c18",
-          backgroundImage:
-            "radial-gradient(120% 90% at 50% 130%, rgba(219,138,74,0.42), transparent 58%)",
+          background: "#171512",
           padding: "80px",
           fontFamily: "sans-serif",
         }}
@@ -30,7 +28,7 @@ export default function OpengraphImage() {
             display: "flex",
             alignItems: "center",
             gap: "16px",
-            color: "#f4ad6a",
+            color: "#e2593a",
             fontSize: 34,
             fontWeight: 600,
           }}
@@ -40,7 +38,7 @@ export default function OpengraphImage() {
               width: 20,
               height: 20,
               borderRadius: 9999,
-              background: "#f4ad6a",
+              background: "#e2593a",
             }}
           />
           {SITE.name}
@@ -49,7 +47,7 @@ export default function OpengraphImage() {
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           <div
             style={{
-              color: "#ece8e0",
+              color: "#e7e0d2",
               fontSize: 68,
               lineHeight: 1.05,
               fontWeight: 600,
@@ -58,7 +56,7 @@ export default function OpengraphImage() {
           >
             {SITE.tagline}
           </div>
-          <div style={{ color: "#a7a2b8", fontSize: 30, maxWidth: 820 }}>
+          <div style={{ color: "#a69d8a", fontSize: 30, maxWidth: 820 }}>
             Share what weighs on you and receive a grounded verse with a short
             reflection.
           </div>

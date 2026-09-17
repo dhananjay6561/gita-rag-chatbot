@@ -1,43 +1,38 @@
 @import "tailwindcss";
 
 /*
- * Cosmic-dawn theme: a night sky warming to dawn on the horizon. One locked
- * dark theme (no section inversions). Surfaces are frosted glass over the sky.
- * Every text pair is verified WCAG AA against both the darkest sky and a lit
- * aurora patch. No pure #000/#fff.
+ * Letterpress "critical edition" theme. Flat and matte: no gradients, no glows,
+ * no glass. One saturated vermillion accent used as rubrication (verse marks),
+ * the way a manuscript rubricator used red. "Black and Tan" palette (warm near-
+ * black stock, warm bone ink), from the anti-slop rotation. One locked theme.
+ * All text pairs verified WCAG AA.
  */
 :root {
-  --night-top: #070812; /* deepest sky */
-  --night-mid: #0b0d1e;
-  --dawn: 219, 138, 74; /* horizon glow (rgb, used at low alpha) */
-
-  --bg: #0a0c18; /* solid fallback */
-  --surface: rgba(18, 20, 40, 0.6); /* frosted panel */
-  --surface-2: rgba(30, 32, 56, 0.6); /* raised fill (chips, skeletons) */
-  --border: rgba(255, 255, 255, 0.1);
-  --ink: #ece8e0; /* warm off-white */
-  --muted: #a7a2b8; /* AA on glass */
-  --accent: #f4ad6a; /* dawn amber */
-  --accent-ink: #1a1206; /* text on accent */
-  --accent-soft: rgba(244, 173, 106, 0.14);
-  --accent-glow: rgba(244, 173, 106, 0.42);
-  --crisis-bg: rgba(58, 36, 24, 0.7);
-  --ring: #f4ad6a;
+  --paper: #171512; /* warm near-black stock */
+  --paper-2: #1f1c17; /* faint raised fill */
+  --ink: #e7e0d2; /* warm bone */
+  --ink-soft: #a69d8a; /* AA muted */
+  --rule: #332e26; /* hairline */
+  --rule-strong: #4a4438; /* visible divider */
+  --accent: #e2593a; /* vermillion rubric */
+  --accent-ink: #171512; /* dark text on accent (AA) */
+  --ring: #e2593a;
+  --radius: 2px; /* one sharp radius scale, printed feel */
 }
 
 @theme inline {
-  --color-bg: var(--bg);
-  --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
-  --color-border: var(--border);
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
   --color-ink: var(--ink);
-  --color-muted: var(--muted);
+  --color-ink-soft: var(--ink-soft);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
-  --color-accent-soft: var(--accent-soft);
-  --color-crisis: var(--crisis-bg);
-  --font-sans: var(--font-outfit);
-  --font-serif: var(--font-spectral);
+  --font-serif: var(--font-eb-garamond);
+  --font-sans: var(--font-geist);
+  --font-mono: var(--font-geist-mono);
+  --radius-edition: var(--radius);
 }
 
 html {
@@ -45,101 +40,44 @@ html {
 }
 
 body {
+  background: var(--paper);
   color: var(--ink);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* Night sky with a dawn glow rising from the horizon. Static + GPU-free so it
-     costs nothing on scroll; the animated stars/aurora live in <Atmosphere/>. */
-  background:
-    radial-gradient(125% 85% at 50% 118%, rgba(var(--dawn), 0.3), transparent 58%),
-    radial-gradient(100% 60% at 50% -12%, rgba(66, 44, 98, 0.4), transparent 55%),
-    linear-gradient(180deg, var(--night-top) 0%, var(--night-mid) 46%, var(--bg) 100%);
-  background-attachment: fixed;
 }
 
-/* Frosted-glass surface with a solid fallback for reduced transparency. */
-.glass {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+/* Faint print grain on a fixed, non-scrolling, pointer-events-none layer (the
+   only sanctioned place for grain). Reinforces the letterpress feel; disabled
+   for reduced transparency. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 @media (prefers-reduced-transparency: reduce) {
-  .glass {
-    background: #14162c;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+  body::after {
+    display: none;
   }
 }
 
-/* Aurora light blooms behind the stars: indigo night, amber dawn. Soft, screen-
-   blended, slowly drifting. Transform-only animation (GPU), paused for reduced
-   motion. Lives on a fixed, non-scrolling layer so the blur rasterises once. */
-.aurora {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(64px);
-  opacity: 0.5;
-  mix-blend-mode: screen;
-  will-change: transform;
-}
-.aurora-1 {
-  width: 62vw;
-  height: 62vw;
-  left: -12vw;
-  top: -18vh;
-  background: radial-gradient(circle, rgba(120, 84, 196, 0.55), transparent 62%);
-}
-.aurora-2 {
-  width: 72vw;
-  height: 72vw;
-  right: -16vw;
-  bottom: -28vh;
-  background: radial-gradient(circle, rgba(219, 138, 74, 0.5), transparent 62%);
-}
-@media (prefers-reduced-motion: no-preference) {
-  .aurora-1 {
-    animation: drift-1 26s ease-in-out infinite alternate;
-  }
-  .aurora-2 {
-    animation: drift-2 32s ease-in-out infinite alternate;
-  }
-  @keyframes drift-1 {
-    to {
-      transform: translate(6vw, 7vh) scale(1.12);
-    }
-  }
-  @keyframes drift-2 {
-    to {
-      transform: translate(-5vw, -6vh) scale(1.16);
-    }
-  }
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
 :where(a, button, textarea, input, [tabindex]):focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
-  border-radius: 6px;
 }
 
-::selection {
-  background: var(--accent-soft);
-}
-
-/* Reduced-motion fallback for the CSS-only entrance used before Motion mounts. */
-@media (prefers-reduced-motion: no-preference) {
-  .rise-in {
-    animation: rise-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-  @keyframes rise-in {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
+/* Hanging rubric numeral in the left margin (verse marks / apparatus). */
+.rubric {
+  color: var(--accent);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
 }
