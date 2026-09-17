@@ -196,7 +196,7 @@ export function Ask() {
             aria-labelledby={labelId}
             aria-describedby={helpId}
             placeholder="Describe the situation, or the feeling you are sitting with."
-            className="w-full resize-none bg-transparent px-4 py-4 font-serif text-lg leading-relaxed text-ink placeholder:text-ink-soft/70 focus:outline-none"
+            className="w-full resize-none bg-transparent px-4 py-4 font-serif text-lg leading-relaxed text-ink placeholder:text-ink-soft focus:outline-none"
           />
 
           <div className="flex items-center justify-between gap-4 border-t border-rule px-3 py-2.5">

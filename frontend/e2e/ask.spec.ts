@@ -38,13 +38,18 @@ test("streams a grounded reflection with the verse panel", async ({ page }) => {
   await expect(submit).toBeEnabled();
   await submit.click();
 
-  // Streamed reply text lands in the answer card.
+  // Streamed reply text lands in the reflection.
   await expect(page.getByText("then release the outcome.")).toBeVisible();
-  // Verse panel renders from the done-frame metadata, not the reply text.
+  // Verse renders from the done-frame metadata, not the reply text.
   await expect(
     page.getByText("Your right is to action alone, never to its fruits."),
   ).toBeVisible();
-  await expect(page.getByText("karmany evadhikaras te")).toBeVisible();
+
+  // The Sanskrit apparatus is revealed on demand (real interaction).
+  const transliteration = page.getByText("karmany evadhikaras te");
+  await expect(transliteration).toBeHidden();
+  await page.getByRole("button", { name: "Show the Sanskrit" }).click();
+  await expect(transliteration).toBeVisible();
 });
 
 test("shows an inline error when the stream route fails", async ({ page }) => {
