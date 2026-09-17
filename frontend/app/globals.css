@@ -1,39 +1,30 @@
 @import "tailwindcss";
 
 /*
- * Semantic token strategy (one system, swapped by prefers-color-scheme).
- * Warm-paper base, single burnt-saffron accent. Every pair below is verified
- * WCAG AA. No pure #000/#fff. Do not introduce a second accent hue.
+ * Cosmic-dawn theme: a night sky warming to dawn on the horizon. One locked
+ * dark theme (no section inversions). Surfaces are frosted glass over the sky.
+ * Every text pair is verified WCAG AA against both the darkest sky and a lit
+ * aurora patch. No pure #000/#fff.
  */
 :root {
-  --bg: #f7f5ef; /* warm paper */
-  --surface: #fffdf9; /* raised reading surface */
-  --surface-2: #f0ece2; /* subtle fill (chips, skeletons) */
-  --border: #e4ded1;
-  --ink: #26221b; /* warm near-black */
-  --muted: #6f685b; /* AA on surface */
-  --accent: #b0491d; /* burnt saffron */
-  --accent-ink: #fffaf4; /* text on accent */
-  --accent-soft: #f6e7db; /* tinted accent wash */
-  --ring: #b0491d;
+  --night-top: #070812; /* deepest sky */
+  --night-mid: #0b0d1e;
+  --dawn: 219, 138, 74; /* horizon glow (rgb, used at low alpha) */
+
+  --bg: #0a0c18; /* solid fallback */
+  --surface: rgba(18, 20, 40, 0.6); /* frosted panel */
+  --surface-2: rgba(30, 32, 56, 0.6); /* raised fill (chips, skeletons) */
+  --border: rgba(255, 255, 255, 0.1);
+  --ink: #ece8e0; /* warm off-white */
+  --muted: #a7a2b8; /* AA on glass */
+  --accent: #f4ad6a; /* dawn amber */
+  --accent-ink: #1a1206; /* text on accent */
+  --accent-soft: rgba(244, 173, 106, 0.14);
+  --accent-glow: rgba(244, 173, 106, 0.42);
+  --crisis-bg: rgba(58, 36, 24, 0.7);
+  --ring: #f4ad6a;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #14120e;
-    --surface: #1d1a15;
-    --surface-2: #262219;
-    --border: #332e22;
-    --ink: #ece6d8;
-    --muted: #a39a88;
-    --accent: #e0824a;
-    --accent-ink: #1a1206;
-    --accent-soft: #2a2013;
-    --ring: #e0824a;
-  }
-}
-
-/* Map tokens to Tailwind utilities (bg-surface, text-ink, border-border, ...) */
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
@@ -44,38 +35,63 @@
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
+  --color-crisis: var(--crisis-bg);
   --font-sans: var(--font-outfit);
   --font-serif: var(--font-spectral);
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: dark;
 }
 
 body {
-  background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* Night sky with a dawn glow rising from the horizon. Static + GPU-free so it
+     costs nothing on scroll; the animated stars/aurora live in <Atmosphere/>. */
+  background:
+    radial-gradient(125% 85% at 50% 118%, rgba(var(--dawn), 0.3), transparent 58%),
+    radial-gradient(100% 60% at 50% -12%, rgba(66, 44, 98, 0.4), transparent 55%),
+    linear-gradient(180deg, var(--night-top) 0%, var(--night-mid) 46%, var(--bg) 100%);
+  background-attachment: fixed;
 }
 
-/* Consistent focus ring on every interactive element (a11y). */
+/* Frosted-glass surface with a solid fallback for reduced transparency. */
+.glass {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    background: #14162c;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
 :where(a, button, textarea, input, [tabindex]):focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
   border-radius: 6px;
 }
 
-/* MOTION_INTENSITY 3: one gentle entrance, gated behind reduced-motion. */
+::selection {
+  background: var(--accent-soft);
+}
+
+/* Reduced-motion fallback for the CSS-only entrance used before Motion mounts. */
 @media (prefers-reduced-motion: no-preference) {
   .rise-in {
-    animation: rise-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: rise-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
   @keyframes rise-in {
     from {
       opacity: 0;
-      transform: translateY(8px);
+      transform: translateY(10px);
     }
     to {
       opacity: 1;
