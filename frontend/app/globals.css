@@ -73,6 +73,50 @@ body {
   }
 }
 
+/* Aurora light blooms behind the stars: indigo night, amber dawn. Soft, screen-
+   blended, slowly drifting. Transform-only animation (GPU), paused for reduced
+   motion. Lives on a fixed, non-scrolling layer so the blur rasterises once. */
+.aurora {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(64px);
+  opacity: 0.5;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+.aurora-1 {
+  width: 62vw;
+  height: 62vw;
+  left: -12vw;
+  top: -18vh;
+  background: radial-gradient(circle, rgba(120, 84, 196, 0.55), transparent 62%);
+}
+.aurora-2 {
+  width: 72vw;
+  height: 72vw;
+  right: -16vw;
+  bottom: -28vh;
+  background: radial-gradient(circle, rgba(219, 138, 74, 0.5), transparent 62%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .aurora-1 {
+    animation: drift-1 26s ease-in-out infinite alternate;
+  }
+  .aurora-2 {
+    animation: drift-2 32s ease-in-out infinite alternate;
+  }
+  @keyframes drift-1 {
+    to {
+      transform: translate(6vw, 7vh) scale(1.12);
+    }
+  }
+  @keyframes drift-2 {
+    to {
+      transform: translate(-5vw, -6vh) scale(1.16);
+    }
+  }
+}
+
 :where(a, button, textarea, input, [tabindex]):focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;

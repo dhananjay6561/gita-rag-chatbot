@@ -4,6 +4,7 @@ import "./globals.css";
 import { SITE } from "@/lib/site";
 import { buildJsonLd } from "@/lib/structured-data";
 import { JsonLd } from "@/components/json-ld";
+import { Atmosphere } from "@/components/atmosphere";
 
 // Interface face. Self-hosted by next/font (no render-blocking <link>), swap +
 // size-adjust fallback to keep CLS at 0.
@@ -62,6 +63,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <JsonLd data={buildJsonLd()} />
+        <Atmosphere />
         {children}
       </body>
     </html>
