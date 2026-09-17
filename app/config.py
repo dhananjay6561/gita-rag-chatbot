@@ -43,6 +43,12 @@ RATE_LIMIT_WINDOW_S = float(os.getenv("RATE_LIMIT_WINDOW_S", "60"))
 # Comma-separated frontend origins for CORS; empty = same-origin only (safe default).
 ALLOWED_ORIGINS = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
 
+# Region used for crisis resources when the caller's locale carries no usable
+# region (bare "en", or one we don't stock). This is a UK-audience deployment,
+# so ambiguous English resolves to a UK helpline rather than the generic
+# international fallback (app/resources.py). Set to "" to keep the fallback.
+DEFAULT_CRISIS_REGION = os.getenv("DEFAULT_CRISIS_REGION", "UK").upper()
+
 # --- Secrets (presence checked at startup, values never logged) -------------
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
