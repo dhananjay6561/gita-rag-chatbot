@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { EB_Garamond, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SITE } from "@/lib/site";
-import { buildJsonLd } from "@/lib/structured-data";
+import { buildSiteJsonLd } from "@/lib/structured-data";
 import { JsonLd } from "@/components/json-ld";
 
 // Reading + display face. Garamond is the canonical scholarly book type, so it
@@ -68,7 +68,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${garamond.variable} ${geist.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <JsonLd data={buildJsonLd()} />
+        <JsonLd data={buildSiteJsonLd()} />
         {children}
       </body>
     </html>
