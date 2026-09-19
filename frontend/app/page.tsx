@@ -3,11 +3,14 @@ import Link from "next/link";
 import { SITE } from "@/lib/site";
 import { Masthead } from "@/components/masthead";
 import { Ask } from "@/components/ask";
+import { JsonLd } from "@/components/json-ld";
+import { buildFaqJsonLd } from "@/lib/structured-data";
 
 // Static server shell. The composer and answer islands own the interaction.
 export default function Home() {
   return (
     <>
+      <JsonLd data={buildFaqJsonLd()} />
       <main className="mx-auto w-full max-w-[44rem] px-6 py-16 sm:py-24">
         <Masthead />
         <div className="mt-14">
