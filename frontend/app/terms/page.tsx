@@ -1,16 +1,28 @@
 import type { Metadata } from "next";
 
 import { LegalDoc } from "@/components/legal-doc";
+import { JsonLd } from "@/components/json-ld";
+import { buildPageJsonLd } from "@/lib/structured-data";
 import { SITE } from "@/lib/site";
+
+const DESCRIPTION = `The terms on which you may use ${SITE.name}.`;
 
 export const metadata: Metadata = {
   title: "Terms of Use",
-  description: `The terms on which you may use ${SITE.name}.`,
+  description: DESCRIPTION,
 };
 
 export default function TermsPage() {
   return (
-    <LegalDoc title="Terms of Use" updated="17 September 2026">
+    <>
+      <JsonLd
+        data={buildPageJsonLd({
+          path: "/terms",
+          name: "Terms of Use",
+          description: DESCRIPTION,
+        })}
+      />
+      <LegalDoc title="Terms of Use" updated="17 September 2026">
       <p>
         By using {SITE.name} you agree to these terms. If you do not agree,
         please do not use the service.
@@ -83,6 +95,7 @@ export default function TermsPage() {
         These terms are governed by the laws of England and Wales, and the
         courts of England and Wales have exclusive jurisdiction.
       </p>
-    </LegalDoc>
+      </LegalDoc>
+    </>
   );
 }

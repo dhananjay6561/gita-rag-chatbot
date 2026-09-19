@@ -1,16 +1,28 @@
 import type { Metadata } from "next";
 
 import { LegalDoc } from "@/components/legal-doc";
+import { JsonLd } from "@/components/json-ld";
+import { buildPageJsonLd } from "@/lib/structured-data";
 import { SITE } from "@/lib/site";
+
+const DESCRIPTION = `How ${SITE.name} handles what you share, under UK data-protection law.`;
 
 export const metadata: Metadata = {
   title: "Privacy Notice",
-  description: `How ${SITE.name} handles what you share, under UK data-protection law.`,
+  description: DESCRIPTION,
 };
 
 export default function PrivacyPage() {
   return (
-    <LegalDoc title="Privacy Notice" updated="17 September 2026">
+    <>
+      <JsonLd
+        data={buildPageJsonLd({
+          path: "/privacy",
+          name: "Privacy Notice",
+          description: DESCRIPTION,
+        })}
+      />
+      <LegalDoc title="Privacy Notice" updated="17 September 2026">
       <p>
         This notice explains what happens to the words you type into {SITE.name}{" "}
         and how we handle them under the UK GDPR and the Data Protection Act
@@ -101,6 +113,7 @@ export default function PrivacyPage() {
         <a href="https://www.samaritans.org/">Samaritans on 116 123</a>. Please
         see our <a href="/terms">Terms of Use</a> for the full picture.
       </p>
-    </LegalDoc>
+      </LegalDoc>
+    </>
   );
 }
