@@ -17,11 +17,12 @@ on them and receives a grounded verse plus a short reflection. Built with Next.j
 ```
 lib/contract.ts        Zod SSOT mirroring the backend /ask + /health contract
 lib/api.ts             server-only backend client, validates every payload
-lib/site.ts            site constants (name, url) feeding metadata + JSON-LD
-lib/structured-data.ts schema.org JSON-LD, derived from lib/site.ts
+lib/site.ts            site constants (name, url, contact) feeding metadata + JSON-LD
+lib/structured-data.ts schema.org JSON-LD: site, FAQ and per-page builders (Zod-validated)
 app/api/ask            proxy route; keeps BACKEND_URL server-side
-app/page.tsx           static server shell + <Ask/> client island
-components/            ask flow, answer, verse card, crisis banner, skeleton
+app/page.tsx           static server shell + <Ask/> client island + FAQ JSON-LD
+app/privacy, app/terms static UK privacy notice + terms, with WebPage/breadcrumb JSON-LD
+components/            ask flow, answer, verse card, crisis banner, skeleton, legal-doc
 scripts/gen-schema     emits schema/*.json from lib/contract.ts
 ```
 
@@ -52,9 +53,11 @@ pnpm gen:schema                # regenerate schema/*.json after editing the cont
 | `BACKEND_URL` | FastAPI base URL, server-side only |
 | `BACKEND_TIMEOUT_MS` | Abort a backend call after this many ms (default 35000) |
 | `NEXT_PUBLIC_SITE_URL` | Canonical public URL for metadata, OG, sitemap, JSON-LD |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | Contact shown on the privacy notice and in the Organization JSON-LD |
 
 ## Deploy
 
-Deploys to Vercel as-is. Set `BACKEND_URL` and `NEXT_PUBLIC_SITE_URL` in the
-project environment. Security headers, sitemap, robots, and a generated OG image
-and favicon are built in.
+Deploys to Vercel as-is. Set `BACKEND_URL`, `NEXT_PUBLIC_SITE_URL`, and
+`NEXT_PUBLIC_CONTACT_EMAIL` in the project environment. Security headers,
+sitemap, robots, structured data, the privacy/terms pages, and a generated OG
+image and favicon are built in.
